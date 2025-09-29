@@ -1,0 +1,55 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "preLaunchTask": "${defaultBuildTask}",
+            "type": "probe-rs-debug",
+            "request": "launch",
+            "name": "probe_rs Executable launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "probe-rs",
+            "runtimeArgs": [
+                "dap-server"
+            ],
+            "chip": "rp2040",
+            "flashingConfig": {
+                "flashingEnabled": true,
+                "haltAfterReset": false
+            },
+            "coreConfigs": [
+                {
+                    "coreIndex": 0,
+                    "programBinary": "${workspaceFolder}/target/thumbv6m-none-eabi/debug/rp-example",
+                    "svdFile": "${workspaceFolder}/rp2040.svd",
+                    "rttEnabled": true,
+                },
+            ],
+            "env": {
+                "DEFMT_LOG": "info",
+            },
+            "consoleLogLevel": "Console",
+        },
+        {
+            "type": "probe-rs-debug",
+            "request": "attach",
+            "name": "probe_rs Executable attach",
+            "cwd": "${workspaceFolder}",
+            "chip": "rp2040",
+            "coreConfigs": [
+                {
+                    "coreIndex": 0,
+                    "programBinary": "${workspaceFolder}/target/thumbv6m-none-eabi/debug/rp-example",
+                    "svdFile": "${workspaceFolder}/rp2040.svd",
+                    "rttEnabled": true,
+                },
+            ],
+            "env": {
+                "DEFMT_LOG": "info",
+            },
+            "consoleLogLevel": "Console",
+        },
+    ]
+}
