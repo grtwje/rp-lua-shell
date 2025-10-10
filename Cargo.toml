@@ -27,6 +27,10 @@ defmt-rtt = "1.0.0"
 cortex-m = { version = "0.7.6", features = ["inline-asm"] }
 cortex-m-rt = "0.7.5"
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
+emballoc = { version = "0.3", features = ["portable_atomic"] }
 
 [profile.release]
 debug = 2
+
+[build-dependencies]
+cc = "1.2.40"

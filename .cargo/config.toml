@@ -2,7 +2,10 @@
 runner = "probe-rs run --chip RP2040"
 
 [build]
-target = "thumbv6m-none-eabi"        # Cortex-M0 and Cortex-M0+
+target = "thumbv6m-none-eabi" # Cortex-M0 and Cortex-M0+
+
+[target.thumbv6m-none-eabi]
+rustflags = ["--cfg", "portable_atomic_unsafe_assume_single_core"]
 
 [env]
 DEFMT_LOG = "debug"

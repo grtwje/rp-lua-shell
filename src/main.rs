@@ -13,6 +13,9 @@ use embassy_time::Timer;
 use gpio::{Level, Output};
 use {defmt_rtt as _, panic_probe as _};
 
+mod alloc;
+mod lua;
+
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_rp::init(Default::default());
@@ -21,6 +24,8 @@ async fn main(_spawner: Spawner) {
     let config = uart::Config::default();
     let mut uart = uart::Uart::new_blocking(p.UART0, p.PIN_0, p.PIN_1, config);
     uart.blocking_write("Hello, World!\r\n".as_bytes()).unwrap();
+
+    lua::test_lua();
 
     loop {
         info!("led on!");
@@ -31,6 +36,6 @@ async fn main(_spawner: Spawner) {
         led.set_low();
         Timer::after_secs(1).await;
 
-        uart.blocking_write("hello there!\r\n".as_bytes()).unwrap();
+        //uart.blocking_write("hello there!\r\n".as_bytes()).unwrap();
     }
 }
