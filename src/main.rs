@@ -15,6 +15,7 @@ use {defmt_rtt as _, panic_probe as _};
 
 mod alloc;
 mod lua;
+mod syscalls;
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
@@ -28,11 +29,11 @@ async fn main(_spawner: Spawner) {
     lua::test_lua();
 
     loop {
-        info!("led on!");
+        //info!("led on!");
         led.set_high();
         Timer::after_secs(1).await;
 
-        info!("led off!");
+        //info!("led off!");
         led.set_low();
         Timer::after_secs(1).await;
 

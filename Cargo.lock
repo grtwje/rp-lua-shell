@@ -933,6 +933,9 @@ name = "portable-atomic"
 version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f84267b20a16ea918e43c6a88433c2d54fa145c92a811b5b047ccbe153674483"
+dependencies = [
+ "critical-section",
+]
 
 [[package]]
 name = "precomputed-hash"
@@ -1046,6 +1049,7 @@ dependencies = [
  "cc",
  "cortex-m",
  "cortex-m-rt",
+ "critical-section",
  "defmt",
  "defmt-rtt",
  "emballoc",
@@ -1053,6 +1057,7 @@ dependencies = [
  "embassy-rp",
  "embassy-time",
  "panic-probe",
+ "portable-atomic",
 ]
 
 [[package]]

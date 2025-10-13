@@ -57,12 +57,11 @@ fn main() {
         .define("LUA_USE_C89", None)
         .define("NDEBUG", None)
         .flags([
-            "-fno-builtin-free",
-            "-fno-builtin-malloc",
-            "-fno-builtin-calloc",
-            "-fno-builtin-realloc",
+            "-fno-builtin",
             "-mthumb",
             "-mcpu=cortex-m0",
+            "--specs=nosys.specs",
+            "--specs=nano.specs",
         ])
         .compile("lua");
 
