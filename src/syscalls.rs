@@ -1,9 +1,16 @@
+//! Newlib-nano has a set of 17 system calls that glue the C lib to your "OS."
+//!
+//! Not all 17 are implemented here. They are only implemented as needed by the
+//! application.
 use core::ffi::{c_char, c_int};
 use defmt::*;
 
 static mut SBRK_HEAP: [u8; 2048] = [0; 2048];
 static mut SBRK_HEAP_PTR: usize = 0;
 
+/// Not sure why Newlib-nano is still calling _sbrk in a few spots when malloc,
+/// realloc and free have been provided in alloc.rs.  NewLib-nano is calling
+/// those most of the time.
 #[unsafe(no_mangle)]
 #[allow(static_mut_refs)]
 pub extern "C" fn _sbrk(incr: isize) -> *mut u8 {
@@ -19,7 +26,6 @@ pub extern "C" fn _sbrk(incr: isize) -> *mut u8 {
     }
 }
 
-//int _write(int file, const void *buf, size_t len) {
 #[unsafe(no_mangle)]
 pub extern "C" fn _write(_file: c_int, buf: *const c_char, len: usize) -> c_int {
     let max_len = core::cmp::min(len, 128);
