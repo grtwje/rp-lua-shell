@@ -2,6 +2,7 @@
 //!
 //! Not all 17 are implemented here. They are only implemented as needed by the
 //! application.
+use crate::console_ldd::console_write_blocking;
 use core::ffi::{c_char, c_int};
 use defmt::*;
 
@@ -33,7 +34,7 @@ pub extern "C" fn _write(_file: c_int, buf: *const c_char, len: usize) -> c_int 
         if !buf.is_null() {
             let bytes = core::slice::from_raw_parts(buf, max_len);
             match core::str::from_utf8(&bytes[..max_len]) {
-                Ok(s) => info!("_write[{}]: {}", max_len, s),
+                Ok(s) => console_write_blocking(s),
                 Err(_) => info!("_write: Invalid UTF-8 sequence"),
             }
         }

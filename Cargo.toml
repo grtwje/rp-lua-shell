@@ -23,6 +23,7 @@ embassy-time = { version = "0.5.0", features = [
     "defmt",
     "defmt-timestamp-uptime",
 ] }
+embassy-sync = { version = "0.7.2", features = ["defmt"] }
 
 defmt = "1.0.1"
 defmt-rtt = "1.1.0"
@@ -32,6 +33,7 @@ critical-section = "1.1"
 panic-probe = { version = "1.0.0", features = ["print-defmt"] }
 emballoc = { version = "0.3", features = ["portable_atomic"] }
 portable-atomic = { version = "1.5", features = ["critical-section"] }
+static_cell = "2.1"
 
 [profile.release]
 debug = true

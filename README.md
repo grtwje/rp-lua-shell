@@ -11,7 +11,8 @@ This is a personal learning project.  There are other good packages for integrat
 
 ## Progress so far
 
-- The first issue is that Lua is written in C. How does one compile C code in a Rust project.  Turned out to be easy using the cc crate.  [Refer](https://docs.rs/cc/latest/cc/).  See the build.rs file for the code that compiles the Lua source.
+- The first issue is that Lua is written in C. How does one compile C code in a Rust project.  Turned out to be easy using the cc crate.  [Refer](https://docs.rs/cc/latest/cc/).  cc calls the C compiler supplied by xPack. See the build.rs file for the code that compiles the Lua source.
+  - To slim down the LUA runtime, I changed the loadedlibs array in linint.c to load only a few basic Lua libs.  I have not removed the code from the compiled image.
 - The second issue is that Lua expects to use the C standard library too.  Research led me to Newlib-nano, a C standard library suited for embedded work. [xPack](https://github.com/xpack-dev-tools) provides a Newlib-nano that can be used on the RP2040.  Newlib-nano binds to your "OS" via 17 syscalls. I have not implemented all 17, just the ones being used by this project.  See syscalls.rs
   - In alloc.rs I created wrappers around C malloc, realloc, and free (see alloc.rs).  [emballoc](https://docs.rs/emballoc/latest/emballoc/) is used for dynamic memory management.  Emballoc will provide a Rust global allocator if I need one later.  Newlib-nano *mostly* uses these 3 calls for dynamic memory.  But it will sometimes call _sbrk too. I provide a super simple_sbrk to cover these cases. I need to figure out where these _sbrk calls are coming from, and why they don't use my malloc/realloc/free.
   - I am working on the _write syscall so that I can print from Lua code.  Currently_write just sends everything to defmtt via info! macro calls.  Need to change this to send to the RP2040 UART.
