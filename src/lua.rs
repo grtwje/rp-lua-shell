@@ -1,3 +1,4 @@
+use crate::console_ldd::console_write_blocking;
 use core::ffi::{c_char, c_int, c_long, c_void};
 use defmt::*;
 
@@ -71,14 +72,11 @@ pub unsafe fn lua_pcall(
 #[unsafe(no_mangle)]
 pub extern "C" fn lua_writestring(s: *const c_char, l: usize) {
     //fwrite((s), sizeof(char), (l), stdout)
-    if s.is_null() {
-        info!("lua_writestring");
-    } else {
+    if !s.is_null() {
         let byte_slice: &[u8] = unsafe { core::slice::from_raw_parts(s, l) };
-        info!(
-            "lua_writestring: {}",
-            core::str::from_utf8(byte_slice).ok().unwrap()
-        );
+        unsafe {
+            console_write_blocking(str::from_utf8_unchecked(byte_slice)).unwrap();
+        }
     }
 }
 
@@ -87,7 +85,7 @@ pub extern "C" fn lua_writestring(s: *const c_char, l: usize) {
 pub extern "C" fn lua_writeline() {
     //lua_writestring("\n", 1)
     // fflush(stdout)
-    info!("lua_writeline");
+    console_write_blocking("\n").unwrap();
 }
 
 /* print an error message */
@@ -95,14 +93,11 @@ pub extern "C" fn lua_writeline() {
 pub extern "C" fn lua_writestringerror(s: *const c_char, l: usize) {
     //fprintf(stderr, (s), (l))
     //fflush(stderr)
-    if s.is_null() {
-        info!("lua_writestringerror");
-    } else {
+    if !s.is_null() {
         let byte_slice: &[u8] = unsafe { core::slice::from_raw_parts(s, l) };
-        info!(
-            "lua_writestringerror: {}",
-            core::str::from_utf8(byte_slice).ok().unwrap()
-        );
+        unsafe {
+            console_write_blocking(str::from_utf8_unchecked(byte_slice)).unwrap();
+        }
     }
 }
 
@@ -205,6 +200,17 @@ unsafe fn test_print(state: *mut c_void) {
     }
 }
 
+unsafe fn test_read(state: *mut c_void) {
+    unsafe {
+        let script = r#"
+            x = io.read(1)
+            print(x)
+        "#;
+        let rv = dostring(state, script, 0);
+        my_assert!(rv == LUA_OK);
+    }
+}
+
 pub fn test_lua() {
     unsafe {
         let state = luaL_newstate();
@@ -215,6 +221,7 @@ pub fn test_lua() {
         test_version(state);
         test_exception(state);
         test_print(state);
+        test_read(state);
 
         lua_close(state);
     }

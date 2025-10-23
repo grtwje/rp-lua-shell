@@ -41,7 +41,12 @@ async fn main(_spawner: Spawner) {
     );
     let (tx, rx) = uart.split();
     console_init(tx, rx).await;
-    console_write("Hello, World!\r\n").await;
+    console_write(concat!(
+        "Embassy executor version: ",
+        env!("EMBASSY_EXECUTOR_VERSION"),
+        "\r\n"
+    ))
+    .await;
 
     lua::test_lua();
 

@@ -14,7 +14,39 @@ use std::fs::File;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+fn find_version(lock: &str, dep: &str) -> Option<String> {
+    let mut lines = lock.lines();
+    while let Some(line) = lines.next() {
+        if line.trim() == format!("name = \"{dep}\"") {
+            // look forward for version = "x.y.z"
+            for l2 in lines.by_ref() {
+                //while let Some(l2) = lines.next() {
+                let t = l2.trim();
+                if t.starts_with("version = ") {
+                    if let Some(v) = t.split('"').nth(1) {
+                        return Some(v.to_string());
+                    }
+                }
+                if t.is_empty() {
+                    break;
+                }
+            }
+        }
+    }
+    None
+}
+
 fn main() {
+    // Re-run when Cargo.lock changes
+    println!("cargo:rerun-if-changed=Cargo.lock");
+
+    if let Ok(lock) = fs::read_to_string("Cargo.lock") {
+        // pick the embassy crate you want; e.g. "embassy-executor" or "embassy-rp"
+        if let Some(v) = find_version(&lock, "embassy-executor") {
+            println!("cargo:rustc-env=EMBASSY_EXECUTOR_VERSION={v}");
+        }
+    }
+
     // Put `memory.x` in our output directory and ensure it's
     // on the linker search path.
     let out = &PathBuf::from(env::var_os("OUT_DIR").unwrap());
@@ -24,11 +56,24 @@ fn main() {
         .unwrap();
     println!("cargo:rustc-link-search={}", out.display());
 
-    // By default, Cargo will re-run a build script whenever
-    // any file in the project changes. By specifying `memory.x`
-    // here, we ensure the build script is only re-run when
-    // `memory.x` is changed.
-    //println!("cargo:rerun-if-changed=memory.x");
+    // ensure rebuild when memory.x changes
+    println!("cargo:rerun-if-changed=memory.x");
+
+    let mut build = cc::Build::new();
+
+    let lua_src_dir = Path::new("lua-5.4.8/src/");
+    if let Ok(entries) = fs::read_dir(lua_src_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().and_then(|s| s.to_str()) == Some("c") {
+                build.file(path.clone());
+            }
+            // tell Cargo to rerun the build script if any file in the lua src dir changes
+            println!("cargo:rerun-if-changed={}", path.display());
+        }
+    }
+    // also track the directory itself (useful for added/removed files)
+    println!("cargo:rerun-if-changed={}", lua_src_dir.display());
 
     let arm_root_path = Path::new(
         "C:/Users/Dev/xpack-arm-none-eabi-gcc-14.2.1-1.1-win32-x64/xpack-arm-none-eabi-gcc-14.2.1-1.1",
@@ -38,11 +83,8 @@ fn main() {
     let my_ar = arm_bin_path.join("arm-none-eabi-ar.exe");
     let arm_lib_path = arm_root_path.join("arm-none-eabi/lib/thumb/v6-m/nofp");
     let gcc_lib_path = arm_root_path.join("lib/gcc/arm-none-eabi/14.2.1/thumb/v6-m/nofp");
-
-    let mut build = cc::Build::new();
     build.compiler(my_gcc);
     build.archiver(my_ar);
-    let lua_src_dir = Path::new("lua-5.4.8/src/");
     if let Ok(entries) = fs::read_dir(lua_src_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
